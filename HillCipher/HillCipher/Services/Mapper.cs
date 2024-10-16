@@ -9,25 +9,45 @@ namespace HillCipher.Services
     internal class Mapper
     {
 
-        // Map the given aplpbet to an array of numbers
-        public static int[] mapAlphabetToNumber(string aplphabet)
+        // Map the given alphabet to an dictionary of numbers and letters
+        public static Dictionary<string, int> mapAlphabetToNumbers(string aplphabet)
         {
-            int[] numbers = new int[aplphabet.Length];
+            Dictionary<string, int> map = new Dictionary<string, int>();
             for (int i = 0; i < aplphabet.Length; i++)
             {
-                numbers[i] = aplphabet[i] - 65;
+                map.Add(aplphabet[i].ToString(), i);
             }
-            return numbers;
+
+            return map;
         }
 
-        public static string mapNumberToAlphabet(int[] numbers)
+        // Map the given letters to numbers using the given alphabet
+        public static int[] mapLettersByAlphabetToNumbers(string letters, Dictionary<string, int> alphabet)
         {
-            string alphabet = "";
-            for (int i = 0; i < numbers.Length; i++)
+
+            int[] result = new int[letters.Length];
+            for (int i = 0; i < letters.Length; i++)
             {
-                alphabet += (char)(numbers[i] + 65);
+                result[i] = alphabet.TryGetValue(letters[i].ToString(), out int value) ? value : -1;
             }
-            return alphabet;
+            return result;
+        }
+
+        // Map the given numbers to letters using the given alphabet
+        public static string mapNumbersByAlphabetToLetters(int[] numbers, Dictionary<string, int> alphabet)
+        {
+            string result = "";
+            foreach (int number in numbers)
+            {
+                foreach (KeyValuePair<string, int> entry in alphabet)
+                {
+                    if (entry.Value == number)
+                    {
+                        result += entry.Key;
+                    }
+                }
+            }
+            return result;
         }
     }
 }

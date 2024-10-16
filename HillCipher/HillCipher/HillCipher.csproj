@@ -10,6 +10,21 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Interfaces\" />
+    <Folder Include="Services\" />
+    <Folder Include="Ressources\" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Update="Alphabet.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Key.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CipherTextExample.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PlainTextExample.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

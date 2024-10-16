@@ -12,7 +12,7 @@ namespace HillCipher.Services
         // Encrypt the given text using the given key
         // The key k is a matrix
         // The plaintext p is a vector or a matrix with one column
-        public static void Encrypt(Matrix k, Matrix p, int m)
+        public static Matrix Encrypt(Matrix k, Matrix p, int m)
         {
             if (!HelpService.IsValidKey(k, m))
             {
@@ -20,13 +20,13 @@ namespace HillCipher.Services
             }
             Matrix result = MatrixCalculation.multiplyMatrix(k, p);
             Matrix resultMod = MatrixCalculation.modMatrix(result, m);
-            resultMod.Print();
+            return resultMod;
         }
 
         // Decrypt the given cipher using the given key
         // The key k is a matrix
         // The cipher c is a vector or a matrix with one column
-        public static void Decrypt(Matrix k, Matrix c, int m)
+        public static Matrix Decrypt(Matrix k, Matrix c, int m)
         {
             if (!HelpService.IsValidKey(k, m))
             {
@@ -35,7 +35,7 @@ namespace HillCipher.Services
             Matrix kInverse = MatrixCalculation.inverseMatrix(k, m);
             Matrix result = MatrixCalculation.multiplyMatrix(kInverse, c);
             Matrix resultMod = MatrixCalculation.modMatrix(result, m);
-            resultMod.Print();
+            return resultMod;
         }
     }
 }

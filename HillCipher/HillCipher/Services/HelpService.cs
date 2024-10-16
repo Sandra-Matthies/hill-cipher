@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.IO;
 using HillCipher.Models;
 
 namespace HillCipher.Services
@@ -38,38 +39,64 @@ namespace HillCipher.Services
             }
         }
 
-        public static Matrix[] splitPlainText(Matrix plainText, int n)
+        public static Matrix mergeCipherText(Matrix[] cipherText, int n)
         {
-            if (plainText.Cols > 1)
+            var result = new Matrix(0, 1);
+            // create a new vector with the all the rows of the cipherText and the data of the cipherText
+            foreach (var cipher in cipherText)
             {
-                throw new Exception("The plain text must be a vector");
-            }
-            Matrix[] result = new Matrix[n];
-            for (int i = 0; i < n; i++)
-            {
-                result[i] = new Matrix(plainText.Rows / n, 1);
-                for (int j = 0; j < plainText.Rows / n; j++)
-                {
-                    result[i].Data[j, 0] = plainText.Data[i * plainText.Rows / n + j, 0];
-                }
+                result = 
             }
             return result;
         }
 
-        public static Matrix mergeCipherText(Matrix[] cipherText, int n)
+        public static string readFromRessource(string fileName)
         {
-            var result = new Matrix();
-            result.Cols = 1;
-            foreach (var c in cipherText)
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string filePath = Path.Combine("C:\\Users\\matthies\\OneDrive - rising systems AG\\Dokumente\\Master-Projekt-WS-24-25\\hill-cipher\\HillCipher\\HillCipher\\Ressources", fileName);
+            try
             {
-                result.Rows += c.Rows;
-                foreach (var d in c.Data)
-                {
-                    result.Data.SetValue(d, result.Rows - c.Rows, 0);
-                }
-
+                string fileContent = File.ReadAllText(filePath);
+                Console.WriteLine("File content:");
+                Console.WriteLine(fileContent);
+                return fileContent;
             }
-            return result;
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("File not found.");
+            }
+            return "";
+        }
+
+        // Create a n*n matrix from a string
+        public static Matrix createKeyMatrix(int[] text)
+        {
+            int n = (int)Math.Sqrt(text.Length);
+            Matrix key = new Matrix(n, n);
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    key.Data[i, j] = text[i * n + j];
+                }
+            }
+            return key;
+        }
+
+        public static Matrix[] createTextMatrices(int[] text, int n)
+        {
+            int m = text.Length;
+            int rows = m / n;
+            Matrix[] matrices = new Matrix[rows];
+            for (int i = 0; i < rows; i++)
+            {
+                matrices[i] = new Matrix(n, 1);
+                for (int j = 0; j < n; j++)
+                {
+                    matrices[i].Data[j, 0] = text[i * n + j];
+                }
+            }
+            return matrices;
         }
     }
 }
