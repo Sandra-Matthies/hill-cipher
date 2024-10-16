@@ -45,7 +45,7 @@ namespace HillCipher.Services
             // create a new vector with the all the rows of the cipherText and the data of the cipherText
             foreach (var cipher in cipherText)
             {
-                result = 
+                result =
             }
             return result;
         }
@@ -53,7 +53,8 @@ namespace HillCipher.Services
         public static string readFromRessource(string fileName)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string filePath = Path.Combine("C:\\Users\\matthies\\OneDrive - rising systems AG\\Dokumente\\Master-Projekt-WS-24-25\\hill-cipher\\HillCipher\\HillCipher\\Ressources", fileName);
+            // TODO: Change dynamic path to the ressources folder
+            string filePath = Path.Combine("", fileName);
             try
             {
                 string fileContent = File.ReadAllText(filePath);
