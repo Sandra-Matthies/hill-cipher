@@ -8,10 +8,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Ressources\Alphabet.txt" />
+    <None Remove="Ressources\CipherTextExample.txt" />
+    <None Remove="Ressources\Key.txt" />
+    <None Remove="Ressources\PlainTextExample.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Interfaces\" />
     <Folder Include="Services\" />
-    <Folder Include="Ressources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Ressources\Alphabet.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\CipherTextExample.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Key.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\PlainTextExample.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Update="Alphabet.txt">

@@ -100,27 +100,19 @@ namespace HillCipher.Services
 
         private static int ModInverse(int a, int m)
         {
-            int m0 = m, t, q;
-            int x0 = 0, x1 = 1;
-
-            if (m == 1)
-                return 0;
-
-            while (a > 1)
+            int i = m, v = 0, d = 1;
+            while (a > 0)
             {
-                q = a / m;
-                t = m;
-                m = a % m;
-                a = t;
-                t = x0;
-                x0 = x1 - q * x0;
-                x1 = t;
+                int t = i / a, x = a;
+                a = i % x;
+                i = x;
+                x = d;
+                d = v - t * x;
+                v = x;
             }
-
-            if (x1 < 0)
-                x1 += m0;
-
-            return x1;
+            v %= m;
+            if (v < 0) v = (v + m) % m;
+            return v;
         }
 
         public static int getDeterminant(Matrix a)

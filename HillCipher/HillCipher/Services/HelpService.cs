@@ -45,7 +45,20 @@ namespace HillCipher.Services
             // create a new vector with the all the rows of the cipherText and the data of the cipherText
             foreach (var cipher in cipherText)
             {
-                result =
+                // create a new matrix with the size of the result matrix + 1
+                var newResult = new Matrix(result.Rows + cipher.Rows, 1);
+                // copy the data of the result matrix to the new result matrix
+                for (int i = 0; i < result.Rows; i++)
+                {
+                    newResult.Data[i, 0] = result.Data[i, 0];
+                }
+                // copy the data of the cipher matrix to the new result matrix
+                for (int i = 0; i < cipher.Rows; i++)
+                {
+                    newResult.Data[result.Rows + i, 0] = cipher.Data[i, 0];
+                }
+                // set the result matrix to the new result matrix
+                result = newResult;
             }
             return result;
         }
@@ -54,7 +67,7 @@ namespace HillCipher.Services
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             // TODO: Change dynamic path to the ressources folder
-            string filePath = Path.Combine("", fileName);
+            string filePath = Path.Combine(currentDirectory, "Ressources", fileName);
             try
             {
                 string fileContent = File.ReadAllText(filePath);

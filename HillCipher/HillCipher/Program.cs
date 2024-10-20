@@ -14,7 +14,7 @@ class Program
         var alphabet_numbers = Mapper.mapAlphabetToNumbers(alphabet);
         var key_numbers = Mapper.mapLettersByAlphabetToNumbers(res_key, alphabet_numbers);
         var key_matrix = HelpService.createKeyMatrix(key_numbers);
-        
+
         key_matrix.Print();
 
         if (!HelpService.IsValidKey(key_matrix, m))
@@ -26,9 +26,9 @@ class Program
         Matrix[] plain_matrices = HelpService.createTextMatrices(plain_numbers, key_matrix.Rows);
 
         Matrix[] cipher_matrices = new Matrix[plain_matrices.Length];
-        for(int i = 0; i < plain_matrices.Length; i++)
+        for (int i = 0; i < plain_matrices.Length; i++)
         {
-            cipher_matrices[i] = (HillService.Encrypt(key_matrix, plain_matrices[i], m));
+            cipher_matrices[i] = HillService.Encrypt(key_matrix, plain_matrices[i], m);
         }
 
         var cipher_matrix = HelpService.mergeCipherText(cipher_matrices, m);
@@ -43,9 +43,9 @@ class Program
         Console.WriteLine(cipher_text);
 
         Matrix[] res = new Matrix[cipher_matrices.Length];
-        foreach (var cipher in cipher_matrices)
+        for(int i=0; i < res.Length; i++)
         {
-            res.Append( HillService.Decrypt(key_matrix, cipher, m));
+            res[i] = HillService.Decrypt(key_matrix, cipher_matrices[i], m);
         }
 
         var res_matrix = HelpService.mergeCipherText(res, m);
