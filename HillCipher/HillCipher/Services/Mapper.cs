@@ -13,9 +13,9 @@ namespace HillCipher.Services
         public static Dictionary<string, int> mapAlphabetToNumbers(string aplphabet)
         {
             Dictionary<string, int> map = new Dictionary<string, int>();
-            for (int i = 0; i < aplphabet.Length; i++)
+            for (int i = 0; i < aplphabet.Length ; i++)
             {
-                map.Add(aplphabet[i].ToString(), i);
+                map.Add(aplphabet[i].ToString(), i+1);
             }
 
             return map;

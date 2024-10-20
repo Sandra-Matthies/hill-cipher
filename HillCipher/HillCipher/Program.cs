@@ -40,6 +40,7 @@ class Program
         }
 
         var cipher_text = Mapper.mapNumbersByAlphabetToLetters(cipher_numbers, alphabet_numbers);
+        Console.WriteLine("Cipher text:");
         Console.WriteLine(cipher_text);
 
         Matrix[] res = new Matrix[cipher_matrices.Length];
@@ -57,6 +58,7 @@ class Program
         }
 
         var res_text = Mapper.mapNumbersByAlphabetToLetters(res_numbers, alphabet_numbers);
+        Console.WriteLine("Decrypted text:");
         Console.WriteLine(res_text);
 
 
