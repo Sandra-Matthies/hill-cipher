@@ -15,7 +15,7 @@ namespace HillCipher.Services
             Dictionary<string, int> map = new Dictionary<string, int>();
             for (int i = 0; i < aplphabet.Length ; i++)
             {
-                map.Add(aplphabet[i].ToString(), i+1);
+                map.Add(aplphabet[i].ToString(), i);
             }
 
             return map;
@@ -28,7 +28,7 @@ namespace HillCipher.Services
             int[] result = new int[letters.Length];
             for (int i = 0; i < letters.Length; i++)
             {
-                result[i] = alphabet.TryGetValue(letters[i].ToString(), out int value) ? value : -1;
+                result[i] = alphabet[letters[i].ToString()];
             }
             return result;
         }

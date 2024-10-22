@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using HillCipher.Models;
 
 namespace HillCipher.Services
@@ -66,12 +67,11 @@ namespace HillCipher.Services
         public static string readFromRessource(string fileName)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            // TODO: Change dynamic path to the ressources folder
             string filePath = Path.Combine(currentDirectory, "Ressources", fileName);
             try
             {
                 string fileContent = File.ReadAllText(filePath);
-                Console.WriteLine("File content:");
+                Console.WriteLine("File content: " + fileName);
                 Console.WriteLine(fileContent);
                 return fileContent;
             }
@@ -111,6 +111,38 @@ namespace HillCipher.Services
                 }
             }
             return matrices;
+        }
+
+        public static Matrix createMatrixFromNumbers(int[] numbers)
+        {
+            // the key matrix is a square matrix  
+            int m = (int)Math.Sqrt(numbers.Length);
+            int n = numbers.Length / m;
+            Matrix result = new Matrix(m, n);
+
+            for (int i = 0; i < m; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    result.Data[i, j] = numbers[i * n + j];
+                }
+            }
+
+
+            return result;
+        }
+
+        public static int[] createarrayFromMatrix(Matrix matrix)
+        {
+            int[] result = new int[matrix.Rows * matrix.Cols];
+            for (int i = 0; i < matrix.Rows; i++)
+            {
+                for (int j = 0; j < matrix.Cols; j++)
+                {
+                    result[i * matrix.Cols + j] = matrix.Data[i, j];
+                }
+            }
+            return result;
         }
     }
 }

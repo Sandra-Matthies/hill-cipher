@@ -28,6 +28,19 @@ namespace HillCipher.Services
             return result;
         }
 
+        public static Matrix multiplyMatrixWithNumber(Matrix a, int b)
+        {
+            Matrix result = new Matrix(a.Rows, a.Cols);
+            for (int i = 0; i < a.Rows; i++)
+            {
+                for (int j = 0; j < a.Cols; j++)
+                {
+                    result.Data[i, j] = a.Data[i, j] * b;
+                }
+            }
+            return result;
+        }
+
         public static Matrix modMatrix(Matrix a, int m)
         {
             Matrix result = new Matrix(a.Rows, a.Cols);
@@ -35,7 +48,8 @@ namespace HillCipher.Services
             {
                 for (int j = 0; j < a.Cols; j++)
                 {
-                    result.Data[i, j] = a.Data[i, j] % m;
+                    var value = a.Data[i, j] % m;
+                    result.Data[i, j] = value < 0? value + m : value;
                 }
             }
             return result;
@@ -50,69 +64,204 @@ namespace HillCipher.Services
 
             int n = a.Rows;
             Matrix result = new Matrix(n, n);
-            double[,] augmented = new double[n, 2 * n];
 
+            // create augmented Matrix
+            int[,] augmented = new int[n, n * 2];
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < n; j++)
                 {
                     augmented[i, j] = a.Data[i, j];
-                }
-                augmented[i, n + i] = 1;
-            }
-
-            for (int i = 0; i < n; i++)
-            {
-                int diagElement = (int)augmented[i, i];
-                int invDiagElement = ModInverse(diagElement, m);
-                if (invDiagElement == 0)
-                {
-                    throw new Exception("Matrix is singular and cannot be inverted");
-                }
-                for (int j = 0; j < 2 * n; j++)
-                {
-                    augmented[i, j] = (augmented[i, j] * invDiagElement) % m;
-                }
-
-                for (int k = 0; k < n; k++)
-                {
-                    if (k != i)
-                    {
-                        int factor = (int)augmented[k, i];
-                        for (int j = 0; j < 2 * n; j++)
-                        {
-                            augmented[k, j] = (augmented[k, j] - factor * augmented[i, j] + m * m) % m;
-                        }
-                    }
+                    augmented[i, j + n] = (i == j) ? 1 : 0;
                 }
             }
+            var aug = new Matrix(augmented);
 
+            // Gaussian Elimination in mod m
+            var g_matrix = GaussianEliminationMod(aug, m);
+
+            g_matrix.Print();
+
+            // Extract the inverse matrix from the augmented matrix
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < n; j++)
                 {
-                    result.Data[i, j] = (int)augmented[i, n + j];
+                    result.Data[i, j] = g_matrix.Data[i, j + n];
                 }
+            }
+
+            if (!checkForIdentitiyMatrix(a, result))
+            {
+                throw new Exception("Result is not the inverted Matrix");
             }
 
             return result;
         }
 
-        private static int ModInverse(int a, int m)
+        // TODO: Complete the Gaussian Elimination in mod m
+        public static Matrix GaussianEliminationMod(Matrix input, int m)
         {
-            int i = m, v = 0, d = 1;
-            while (a > 0)
+            Matrix output = new Matrix(input.Rows, input.Cols);
+            int n = input.Rows;
+            int[,] a = input.Data;
+            Matrix[] rows = new Matrix[n];
+
+            // Create a matrix for each row
+            for (int i = 0; i < n; i++)
             {
-                int t = i / a, x = a;
-                a = i % x;
-                i = x;
-                x = d;
-                d = v - t * x;
-                v = x;
+                rows[i] = new Matrix(1, input.Cols);
+                for (int j = 0; j < input.Cols; j++)
+                {
+                    rows[i].Data[0, j] = a[i, j];
+                }
             }
-            v %= m;
-            if (v < 0) v = (v + m) % m;
-            return v;
+
+            // Perform Gaussian Elimination
+            int x = 0;
+            foreach (var row in rows)
+            {
+                row.Print();
+                var pivot = row.Data[0, x];
+                var pivot_inverse = modInverse(pivot, m);
+
+                Console.WriteLine("Pivot: " + pivot);
+                Console.WriteLine("Pivot Inverse: " + pivot_inverse);
+                for (int j = 0; j < n; j++)
+                {
+                    if (j == x)
+                    {
+                        rows[j] = modMatrix(multiplyMatrixWithNumber(rows[j], pivot_inverse), m);
+                    }
+                    else
+                    { 
+                        var factor = rows[j].Data[0, x];
+                        rows[j] = modMatrix(subMatrix(rows[j], modMatrix(multiplyMatrixWithNumber(row, factor),m)),m);
+                    }
+                }
+                x++;
+            }
+
+            // Create the output matrix
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    output.Data[i, j] = rows[i].Data[0, j];
+                }
+            }
+            return modMatrix(output, m);
+        }
+
+
+        static Matrix subMatrix(Matrix a, Matrix b)
+        {
+            if (a.Rows != b.Rows || a.Cols != b.Cols)
+            {
+                throw new Exception("Matrices must have the same dimensions");
+            }
+            Matrix result = new Matrix(a.Rows, a.Cols);
+            for (int i = 0; i < a.Rows; i++)
+            {
+                for (int j = 0; j < a.Cols; j++)
+                {
+                    result.Data[i, j] = a.Data[i, j] - b.Data[i, j];
+                }
+            }
+            return result;
+        }
+
+        static bool checkForIdentitiyMatrix(Matrix a, Matrix b)
+        {
+            Matrix i = new Matrix(a.Rows, a.Cols);
+            for (int j = 0; j < a.Rows; j++)
+            {
+                i.Data[j, j] = 1;
+            }
+            var res = multiplyMatrix(a, b);
+            res = modMatrix(res, 26);
+            return res.Data == i.Data;
+        }
+
+        // Calculate the left inverse of a matrix
+        // Left Inverse exists if the matrix has more rows than columns
+
+        public static Matrix leftInverse(Matrix matrix, int m)
+        {
+            // Calculate the transpose of the matrix
+            Matrix transpose_matrix = transpose(matrix);
+
+            // Calculate (A^T * A)^-1
+            Matrix product = multiplyMatrix(transpose_matrix, matrix);
+            Matrix inverseProduct = inverseMatrix(product, m);
+
+            // Calculate the left inverse: (A^T * A)^-1 * A^T
+            Matrix leftInverse = multiplyMatrix(inverseProduct, transpose_matrix);
+
+            return leftInverse;
+        }
+
+        // Calculate the right inverse of a matrix
+        // Right Inverse exists if the matrix has more columns than rows
+        public static Matrix rightInverse(Matrix matrix, int m)
+        {
+            // Calculate the transpose of the matrix
+            Matrix transpose_matrix = transpose(matrix);
+
+            // Calculate (A * A^T)^-1
+            Matrix product = multiplyMatrix(matrix, transpose_matrix);
+            Matrix product_m = modMatrix(product, m);
+            Matrix inverseProduct = inverseMatrix(product_m, m);
+
+            // Calculate the right inverse: A^T * (A * A^T)^-1
+            Matrix rightInverse = multiplyMatrix(transpose_matrix, inverseProduct);
+
+            return rightInverse;
+        }
+
+
+        public static Matrix transpose(Matrix matrix)
+        {
+            Matrix result = new Matrix(matrix.Cols, matrix.Rows);
+            for (int i = 0; i < matrix.Rows; i++)
+            {
+                for (int j = 0; j < matrix.Cols; j++)
+                {
+                    result.Data[j, i] = matrix.Data[i, j];
+                }
+            }
+            return result;
+        }
+
+        private static int modInverse(int a, int m)
+        {
+            // Get the Faktor x of a * x = 1 mod m
+            int m0 = m;
+            int y = 0, x = 1;
+
+            if (m == 1)
+                return 0; 
+
+            while (a > 1)
+            {
+                int q = a / m;
+                int t = m;
+
+                m = a % m;
+                a = t;
+
+                t = y;
+                y = x - q * y;
+                x = t;
+            }
+
+            // Make sure x is positive
+            if (x < 0)
+                x += m0;
+
+            return x;
+        
+
         }
 
         public static int getDeterminant(Matrix a)
