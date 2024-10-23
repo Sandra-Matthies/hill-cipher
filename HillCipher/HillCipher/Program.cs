@@ -1,9 +1,21 @@
 ﻿
 using HillCipher.Models;
 using HillCipher.Services;
+using System;
+using System.IO;
+using System.Text.Json;
 
 class Program
 {
+    public static int KEY_DIMENSION { get; private set; }
+
+    public static void initKeyDimension()
+    {
+        var settings = HelpService.readFromRessource("settings.json");
+        var jsonDocument = JsonDocument.Parse(settings);
+        KEY_DIMENSION = jsonDocument.RootElement.GetProperty("keyDimension").GetInt32();
+
+    }
 
     static string Encrypt(Matrix key_matrix, Matrix[] plain_matrices, Dictionary<string, int> alphabet_numbers, int m)
     {
@@ -46,6 +58,7 @@ class Program
 
     static void Main(string[] args)
     {
+        initKeyDimension();
         string res_key = HelpService.readFromRessource("Key.txt");
         string res_plain = HelpService.readFromRessource("PlainTextExample.txt");
         string res_cipher = HelpService.readFromRessource("CipherTextExample.txt");
@@ -60,28 +73,33 @@ class Program
         }
 
         var plain_numbers = Mapper.mapLettersByAlphabetToNumbers(res_plain, alphabet_numbers);
-        Matrix[] plain_matrices = HelpService.createTextMatrices(plain_numbers, key_matrix.Rows);
+        Matrix[] plain_matrices = HelpService.createTextMatrices(plain_numbers, key_matrix.Rows, alphabet_numbers);
 
         var cipher = Encrypt(key_matrix, plain_matrices, alphabet_numbers, m);
         Console.WriteLine("Cipher text:");
         Console.WriteLine(cipher);
 
         var cipher_numbers = Mapper.mapLettersByAlphabetToNumbers(cipher, alphabet_numbers);
-        Matrix[] cipher_matrices = HelpService.createTextMatrices(cipher_numbers, key_matrix.Rows);
+        Matrix[] cipher_matrices = HelpService.createTextMatrices(cipher_numbers, key_matrix.Rows, alphabet_numbers);
 
         var plain = Decrypt(key_matrix, cipher_matrices, alphabet_numbers, m);
 
         Console.WriteLine("Plain text:");
         Console.WriteLine(plain);
-        /*var plain_text_matrix = HelpService.createMatrixFromNumbers(plain_numbers);
-        var cipher_text_matrix = HelpService.createMatrixFromNumbers(plain_numbers);
+
+        var res_plain_numbers = Mapper.mapLettersByAlphabetToNumbers(res_plain, alphabet_numbers);
+        var res_cipher_numbers = Mapper.mapLettersByAlphabetToNumbers(res_cipher, alphabet_numbers);
+        Matrix[] res_cipher_matrices = HelpService.createTextMatrices(res_cipher_numbers, KEY_DIMENSION, alphabet_numbers);
+        Matrix[] res_plain_matrices = HelpService.createTextMatrices(res_plain_numbers, KEY_DIMENSION, alphabet_numbers);
+
+        var plain_text_matrix = HelpService.getSquareMatrix(res_plain_matrices, KEY_DIMENSION);
+        var cipher_text_matrix = HelpService.getSquareMatrix(res_cipher_matrices, KEY_DIMENSION);
 
         var key = KnownPlainTextAttack.Attack(plain_text_matrix, cipher_text_matrix, m);
         Console.WriteLine("Key:");
         var res_key_numbers = HelpService.createarrayFromMatrix(key);
         var key_text = Mapper.mapNumbersByAlphabetToLetters(res_key_numbers, alphabet_numbers);
-        key.Print();
-        Console.WriteLine(key_text);*/
+        Console.WriteLine(key_text);
 
     }
 

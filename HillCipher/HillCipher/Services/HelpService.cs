@@ -97,12 +97,26 @@ namespace HillCipher.Services
             return key;
         }
 
-        public static Matrix[] createTextMatrices(int[] text, int n)
+        public static Matrix[] createTextMatrices(int[] text, int n, Dictionary<string, int> alphabet)
         {
             int m = text.Length;
-            int rows = m / n;
-            Matrix[] matrices = new Matrix[rows];
-            for (int i = 0; i < rows; i++)
+            int cols = m / n;
+            while(cols * n < m )
+            {
+                cols++;
+            }
+            while(cols * n > m)
+            {
+                int[] tmp = new int[text.Length + 1];
+                text.CopyTo(tmp, 0);
+                alphabet.TryGetValue(" ", out int emptyValue);
+                tmp[tmp.Length - 1] = emptyValue;
+                m = tmp.Length;
+                text = tmp;
+            }
+            
+            Matrix[] matrices = new Matrix[cols];
+            for (int i = 0; i < cols; i++)
             {
                 matrices[i] = new Matrix(n, 1);
                 for (int j = 0; j < n; j++)
@@ -110,24 +124,32 @@ namespace HillCipher.Services
                     matrices[i].Data[j, 0] = text[i * n + j];
                 }
             }
+            if(text.Length > matrices.Length * n)
+            {
+                int index = matrices.Length * n;
+                while (index < text.Length) {
+                    var mat = new Matrix(n, 1);
+                    for(int j = index; j < text.Length; j++)
+                    {
+                        mat.Data[j - index, 0] = text[j];
+                        index++;
+                    }
+                }
+            }
             return matrices;
         }
 
-        public static Matrix createMatrixFromNumbers(int[] numbers)
+        public static Matrix getSquareMatrix(Matrix[] matrices, int n)
         {
-            // the key matrix is a square matrix  
-            int m = (int)Math.Sqrt(numbers.Length);
-            int n = numbers.Length / m;
-            Matrix result = new Matrix(m, n);
+            Matrix result = new Matrix(n, n);
 
-            for (int i = 0; i < m; i++)
+            for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < n; j++)
                 {
-                    result.Data[i, j] = numbers[i * n + j];
+                    result.Data[j, i] = matrices[i].Data[j, 0];
                 }
             }
-
 
             return result;
         }

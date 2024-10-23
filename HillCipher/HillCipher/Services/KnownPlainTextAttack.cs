@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using HillCipher.Models;
 
@@ -15,35 +16,15 @@ namespace HillCipher.Services
                 throw new Exception("Invalid text matrix");
             }
 
-            // Create system of equations for K = C*[P]^-1
+            // Create system of equations for K = C * P^-1 mod m
 
-            var n = plainText.Rows;
-            var key = new Matrix(n, n);
-            Matrix inversePlainTextMatrix;
-            if (plainText.Cols < plainText.Rows)
-            {
-                inversePlainTextMatrix = MatrixCalculation.leftInverse(plainText, m);
-            }
-             else if (plainText.Cols > plainText.Rows)
-            {
-                inversePlainTextMatrix = MatrixCalculation.rightInverse(plainText, m);
-            }
-            else { 
-                inversePlainTextMatrix = MatrixCalculation.inverseMatrix(plainText, m);
-            } 
+            // Create the inverse of the plain text matrix
+            Matrix inversePlainText = MatrixCalculation.inverseMatrix(plainText, m);
 
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = 0; j < n; j++)
-                {
-                    key.Data[i, j] = 0;
-                    for (int k = 0; k < n; k++)
-                    {
-                        key.Data[i, j] += cipherText.Data[i, k] * inversePlainTextMatrix.Data[k, j];
-                    }
-                    key.Data[i, j] = key.Data[i, j] % m;
-                }
-            }
+
+            var key = MatrixCalculation.multiplyMatrix(cipherText, inversePlainText);
+
+            key = MatrixCalculation.modMatrix(key, m);
             return key;
         }
 

@@ -32,6 +32,26 @@ namespace HillCipher.Models
             Data = data;
         }
 
+        public bool Equals(Matrix a)
+        {
+            if (Rows != a.Rows || Cols != a.Cols)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Cols; j++)
+                {
+                    if (Data[i, j] != a.Data[i, j])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         public void Print()
         {
             for (int i = 0; i < Rows; i++)

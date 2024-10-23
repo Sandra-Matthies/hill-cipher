@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using HillCipher.Models;
 
@@ -80,8 +81,6 @@ namespace HillCipher.Services
             // Gaussian Elimination in mod m
             var g_matrix = GaussianEliminationMod(aug, m);
 
-            g_matrix.Print();
-
             // Extract the inverse matrix from the augmented matrix
             for (int i = 0; i < n; i++)
             {
@@ -91,15 +90,9 @@ namespace HillCipher.Services
                 }
             }
 
-            if (!checkForIdentitiyMatrix(a, result))
-            {
-                throw new Exception("Result is not the inverted Matrix");
-            }
-
             return result;
         }
 
-        // TODO: Complete the Gaussian Elimination in mod m
         public static Matrix GaussianEliminationMod(Matrix input, int m)
         {
             Matrix output = new Matrix(input.Rows, input.Cols);
@@ -121,36 +114,30 @@ namespace HillCipher.Services
             int x = 0;
             foreach (var row in rows)
             {
-                row.Print();
                 var pivot = row.Data[0, x];
                 var pivot_inverse = modInverse(pivot, m);
-
-                Console.WriteLine("Pivot: " + pivot);
-                Console.WriteLine("Pivot Inverse: " + pivot_inverse);
+                rows[x] = modMatrix(multiplyMatrixWithNumber(rows[x], pivot_inverse), m);
                 for (int j = 0; j < n; j++)
                 {
-                    if (j == x)
+                    if (j != x)
                     {
-                        rows[j] = modMatrix(multiplyMatrixWithNumber(rows[j], pivot_inverse), m);
-                    }
-                    else
-                    { 
                         var factor = rows[j].Data[0, x];
-                        rows[j] = modMatrix(subMatrix(rows[j], modMatrix(multiplyMatrixWithNumber(row, factor),m)),m);
+                        rows[j] = modMatrix(subMatrix(rows[j], modMatrix(multiplyMatrixWithNumber(rows[x], factor), m)), m);
                     }
                 }
                 x++;
             }
 
-            // Create the output matrix
-            for (int i = 0; i < n; i++)
+            // create output matrix
+            for (int i = 0; i < rows.Length; i++)
             {
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < rows[i].Cols; j++)
                 {
                     output.Data[i, j] = rows[i].Data[0, j];
                 }
+
             }
-            return modMatrix(output, m);
+            return output;
         }
 
 
@@ -171,16 +158,24 @@ namespace HillCipher.Services
             return result;
         }
 
-        static bool checkForIdentitiyMatrix(Matrix a, Matrix b)
+        public static bool checkForIdentitiyMatrix(Matrix a, Matrix b, int m)
         {
+            if(a.Rows > b.Cols)
+            {
+                return false;
+            }
             Matrix i = new Matrix(a.Rows, a.Cols);
             for (int j = 0; j < a.Rows; j++)
             {
-                i.Data[j, j] = 1;
+                for( int y =0; y <a.Cols; y++)
+                {
+                    if(j == y)
+                        i.Data[j, y] = 1;
+                }
             }
             var res = multiplyMatrix(a, b);
-            res = modMatrix(res, 26);
-            return res.Data == i.Data;
+            res = modMatrix(res, m);
+            return res.Equals(i);
         }
 
         // Calculate the left inverse of a matrix
@@ -214,9 +209,9 @@ namespace HillCipher.Services
             Matrix inverseProduct = inverseMatrix(product_m, m);
 
             // Calculate the right inverse: A^T * (A * A^T)^-1
-            Matrix rightInverse = multiplyMatrix(transpose_matrix, inverseProduct);
+            Matrix rightInverseMatrix = multiplyMatrix(transpose_matrix, inverseProduct);
 
-            return rightInverse;
+            return modMatrix(rightInverseMatrix, m);
         }
 
 
